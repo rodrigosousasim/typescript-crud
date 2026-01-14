@@ -21,13 +21,13 @@ jobs:
         working-directory: apps/api
         run: npm install
 
-      - name: Build API
-        working-directory: apps/api
-        run: npm run build
-
       - name: Prisma Generate
         working-directory: apps/api
         run: npx prisma generate
+
+      - name: Build API
+        working-directory: apps/api
+        run: npm run build
 
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@4.3.0
@@ -37,4 +37,10 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           local-dir: apps/api/
           server-dir: stage/crudapi.stage.br.ivao.aero/
-          dry-run: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/.cache/**
+            src/**
+            *.ts
+            tsconfig.json
