@@ -29,6 +29,12 @@ jobs:
         working-directory: apps/api
         run: npm run build
 
+      - name: Prepare Swagger Static Files
+        working-directory: apps/api
+        run: |
+          mkdir -p dist/src/docs
+          cp -rv node_modules/swagger-ui-dist/* dist/src/docs/
+
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@4.3.0
         with:
