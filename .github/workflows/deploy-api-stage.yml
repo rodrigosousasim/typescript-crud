@@ -30,10 +30,16 @@ jobs:
         run: npm run build
 
       - name: Prepare Swagger Static Files
-        working-directory: apps/api
         run: |
-          mkdir -p dist/src/docs
-          cp -rv node_modules/swagger-ui-dist/. dist/src/docs/
+          mkdir -p apps/api/dist/src/docs
+          if [ -d "apps/api/node_modules/swagger-ui-dist" ]; then
+            cp -rv apps/api/node_modules/swagger-ui-dist/. apps/api/dist/src/docs/
+          elif [ -d "node_modules/swagger-ui-dist" ]; then
+            cp -rv node_modules/swagger-ui-dist/. apps/api/dist/src/docs/
+          else
+            echo "ERRO: node_modules/swagger-ui-dist não encontrada!"
+            exit 1
+          fi
 
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@4.3.0
