@@ -32,7 +32,6 @@ jobs:
       - name: Prepare Swagger Static Files
         working-directory: apps/api
         run: |
-          cd apps/api
           mkdir -p dist/src/docs
           cp -rv node_modules/swagger-ui-dist/. dist/src/docs/
 
