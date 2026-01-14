@@ -1,0 +1,58 @@
+name: Deploy Backend (API) to Plesk via FTP
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ftp-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: apps/api
+        run: npm install
+
+      - name: Prisma Generate
+        working-directory: apps/api
+        run: npx prisma generate
+
+      - name: Build API
+        working-directory: apps/api
+        run: npm run build
+
+      - name: Prepare Swagger Static Files
+        run: |
+          mkdir -p apps/api/dist/src/docs
+          if [ -d "apps/api/node_modules/swagger-ui-dist" ]; then
+            cp -rv apps/api/node_modules/swagger-ui-dist/. apps/api/dist/src/docs/
+          elif [ -d "node_modules/swagger-ui-dist" ]; then
+            cp -rv node_modules/swagger-ui-dist/. apps/api/dist/src/docs/
+          else
+            echo "ERRO: node_modules/swagger-ui-dist não encontrada!"
+            exit 1
+          fi
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        with:
+          server: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          password: ${{ secrets.PASSWORD }}
+          local-dir: apps/api/
+          server-dir: stage/crudapi.stage.br.ivao.aero/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/.cache/**
+            src/**
+            *.ts
+            tsconfig.json
