@@ -1,0 +1,38 @@
+name: Deploy Frontend (WEB) to Plesk via FTP
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install All Dependencies
+        run: npm install
+      
+      - name: Build Frontend (Static)
+        env:
+          NEXT_PUBLIC_API_URL: https://crudapi.stage.br.ivao.aero
+        run: npx turbo run build --filter=web
+
+      - name: Deploy Frontend to Plesk
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          password: ${{ secrets.PASSWORD }}
+          local-dir: apps/web/out/
+          server-dir: /stage/crud.stage.br.ivao.aero/httpdocs/
+          dangerous-clean-slate: true
